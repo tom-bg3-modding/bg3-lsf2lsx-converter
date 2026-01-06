@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<save>
+	<version major="4" minor="8" revision="0" build="200" lslib_meta="v1,bswap_guids,lsf_keys_adjacency" />
+	<region id="Templates">
+		<node id="Templates">
+			<children>
+				<node id="GameObjects">
+					<attribute id="MapKey" type="FixedString" value="92c22339-0552-45ee-b613-6bf5e9a268fd" />
+					<attribute id="Name" type="LSString" value="DH_Basement_23e_Rose_Crypt_Room_Trigger" />
+					<attribute id="LevelName" type="FixedString" value="DH_DurstManor_Basement_A" />
+					<attribute id="Type" type="FixedString" value="trigger" />
+					<attribute id="TemplateName" type="FixedString" value="638ea3cf-e3f3-4302-a708-7a01c646298a" />
+					<attribute id="Flag" type="uint8" value="1" />
+					<attribute id="RenderMethod" type="uint8" value="1" />
+					<attribute id="OneShotTrigger" type="bool" value="False" />
+					<attribute id="Border" type="float" value="0.5" />
+					<attribute id="Extents" type="fvec3" value="5.799999 4.1499977 5.200001" />
+					<children>
+						<node id="Transform">
+							<attribute id="Scale" type="float" value="1" />
+							<attribute id="Position" type="fvec3" value="114.44435 23.057417 258.34286" />
+							<attribute id="RotationQuat" type="fvec4" value="0 0 0 1" />
+						</node>
+						<node id="LayerList">
+							<children>
+								<node id="Layers">
+									<children>
+										<node id="Object" key="MapKey">
+											<attribute id="MapKey" type="FixedString" value="DH_DurstManor_Basement_A" />
+											<children>
+												<node id="Layer">
+													<attribute id="Object" type="guid" value="e4ec2096-5e2c-e6c9-b7ef-313969eb4601" />
+												</node>
+											</children>
+										</node>
+									</children>
+								</node>
+							</children>
+						</node>
+						<node id="AttachedPortals">
+							<attribute id="Object" type="FixedString" value="43c1e8c5-5072-42a4-beb1-85eba5aa452c" />
+						</node>
+						<node id="FadeChildren" />
+					</children>
+				</node>
+			</children>
+		</node>
+	</region>
+</save>
