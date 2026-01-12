@@ -476,7 +476,6 @@ func nodeHashString(node *Node) string {
 			}
 		}
 	}
-	fmt.Println(result.String())
 
 	return result.String()
 }
