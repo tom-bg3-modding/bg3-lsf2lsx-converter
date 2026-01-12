@@ -21,9 +21,8 @@ type LSMetadata struct {
 
 // Resource is the root structure containing regions
 type Resource struct {
-	Metadata       LSMetadata
-	MetadataFormat LSFMetadataFormat
-	Regions        map[string]*Region
+	Metadata LSMetadata
+	Regions  map[string]*Region
 }
 
 // Region is a top-level container (root node)
@@ -121,7 +120,7 @@ type TranslatedFSStringArgument struct {
 	String TranslatedFSString
 }
 
-// LSFMetadataFormat indicates the metadata format
+// Metadata format (BG3 only uses LSFMetadataKeysAndAdjacency)
 type LSFMetadataFormat uint32
 
 const (

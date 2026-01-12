@@ -2,7 +2,13 @@ WIP
 
 # What is an LSF File?
 
-At a very high level, an LSF file describes the tree like structure of Game Object.
+At a very high level, an LSF file describes the tree like structure of Game Object. It's not just a binary encoded version of an XML file, instead it contains 5 data sections that together can be used to build the LSX file.
+
+1. Strings - A hash map of indexes to names. Names are all the string values in the file. It's something like `MapKey` or `NAT_Cursed_Roots_Trunk_E_009`. The hash map reduces duplication, as the other data sections refer to names just by their index.
+2. Nodes - 
+3. Attributes - 
+4. Values - 
+5. Keys - 
 
 ## Structure of an LSF File
 
@@ -57,13 +63,25 @@ Recall numbers are little endian, so we count backwards:
 
 ### Metadata
 
-The metadata section is the next 48 bytes. 
+The metadata section is the next 48 bytes. The 5 sections of data (Strings, Keys, Nodes, Attributes, Values) each have 8 bytes describing the decompressed size of the data section in bytes (4 bits) and the compressed size of the data section (4 bytes). The compressed size is 0 if the data is stored uncompressed.
 
-- Strings
-- Keys
-- Nodes
-- Attributes
-- Values
+The next 4 bytes store the compression info. Only the first byte is actually used, we don't know what the next 3 bytes are.
+The byte is split in 2. The first 4 bits store the flag for the compression method, from 0 to 3:
+
+  0. No compression
+  1. Zlib compression
+  2. LZ4 compression
+  3. Zstd compression
+
+The next 4 bits are the compression level, from 0 to 15.
+
+The final 4 bytes in the section is the metadata format. It's a 32bit int from 0 to 2:
+
+0. LSFMetadataNone
+1. LSFMetadataKeysAndAdjacency
+2. LSFMetadataNone2
+
+The only format we use in BG3 is LSFMetadataKeysAndAdjacency.
 
 ### Compressed Data
 

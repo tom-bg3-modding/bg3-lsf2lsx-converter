@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 func WriteLSX(filename string, resource *Resource) error {
@@ -126,7 +127,9 @@ func writeNode(encoder *xml.Encoder, node *Node) error {
 		return err
 	}
 
-	// Write attributes (sorted for deterministic output)
+	// We sort everything before writing to ensure the LSX is deterministic.
+
+	//// Attributes ////
 	attrNames := make([]string, 0, len(node.Attributes))
 	for attrName := range node.Attributes {
 		attrNames = append(attrNames, attrName)
@@ -139,14 +142,14 @@ func writeNode(encoder *xml.Encoder, node *Node) error {
 		}
 	}
 
-	// Write children (sorted for deterministic output)
+	//// Children ////
 	if len(node.Children) > 0 {
 		err = encoder.EncodeToken(xml.StartElement{Name: xml.Name{Local: "children"}})
 		if err != nil {
 			return err
 		}
 
-		// Sort child node names
+		// Sort child node names alphabetically first
 		childNames := make([]string, 0, len(node.Children))
 		for childName := range node.Children {
 			childNames = append(childNames, childName)
@@ -155,6 +158,12 @@ func writeNode(encoder *xml.Encoder, node *Node) error {
 
 		for _, childName := range childNames {
 			children := node.Children[childName]
+			// Multiple children with the same name - sort by their hash
+			if len(children) > 1 {
+				sort.Slice(children, func(i, j int) bool {
+					return nodeHashString(children[i]) < nodeHashString(children[j])
+				})
+			}
 			for _, child := range children {
 				err = writeNode(encoder, child)
 				if err != nil {
@@ -390,6 +399,86 @@ func formatUUID(uuid []byte, byteSwap bool) string {
 		bytes[7], bytes[6], // Next 2 bytes
 		bytes[8], bytes[9], // Next 2 bytes
 		bytes[10], bytes[11], bytes[12], bytes[13], bytes[14], bytes[15]) // Last 6 bytes
+}
+
+/*
+Used to sort nodes deterministically.
+
+We need this cos we wanna diff the LSXs, and nodes being in a different order will flag changes that
+aren't actually changes. There's 2 ways nodes could get out of order in the data resource:
+  - The maps we use to store the nodes are an unordered data structure
+  - The actual binary gets out of order (The Divinity Engine might not write em deterministically)
+
+We can't just sort alphabetically because sibling nodes can have the same name (i.e. Object)). The
+simplest way to guarantee the same nodes are always in the same order is to hash the entire node
+(attributes + children) and sort by that.
+*/
+func nodeHashString(node *Node) string {
+	var result strings.Builder
+
+	// Start with key attribute if present
+	if node.KeyAttribute != "" {
+		result.WriteString("key:")
+		result.WriteString(node.KeyAttribute)
+		result.WriteString("|")
+	}
+
+	// Add all attributes sorted by name
+	attrNames := make([]string, 0, len(node.Attributes))
+	for attrName := range node.Attributes {
+		attrNames = append(attrNames, attrName)
+	}
+	sort.Strings(attrNames)
+
+	for _, attrName := range attrNames {
+		result.WriteString(attrName)
+		result.WriteString(":")
+		result.WriteString(attributeValueToString(node.Attributes[attrName]))
+		result.WriteString("|")
+	}
+
+	// Add all children recursively, sorted by name then by their hash strings
+	childNames := make([]string, 0, len(node.Children))
+	for childName := range node.Children {
+		childNames = append(childNames, childName)
+	}
+	sort.Strings(childNames)
+
+	for _, childName := range childNames {
+		children := node.Children[childName]
+		// Sort children with the same name by their hash strings
+		if len(children) > 1 {
+			childHashes := make([]struct {
+				node *Node
+				hash string
+			}, len(children))
+			for i, child := range children {
+				childHashes[i] = struct {
+					node *Node
+					hash string
+				}{child, nodeHashString(child)}
+			}
+			sort.Slice(childHashes, func(i, j int) bool {
+				return childHashes[i].hash < childHashes[j].hash
+			})
+			for _, ch := range childHashes {
+				result.WriteString(childName)
+				result.WriteString(":")
+				result.WriteString(ch.hash)
+				result.WriteString("|")
+			}
+		} else {
+			for _, child := range children {
+				result.WriteString(childName)
+				result.WriteString(":")
+				result.WriteString(nodeHashString(child))
+				result.WriteString("|")
+			}
+		}
+	}
+	fmt.Println(result.String())
+
+	return result.String()
 }
 
 func attributeValueToString(attr *NodeAttribute) string {

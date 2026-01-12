@@ -7,8 +7,8 @@ import (
 )
 
 func main() {
-	var inputFile = flag.String("input", "", "Input LSF file path")
-	var outputFile = flag.String("output", "", "Output LSX file path (optional, defaults to stdout)")
+	var inputFile = flag.String("i", "", "Input LSF file path")
+	var outputFile = flag.String("o", "", "Output LSX file path (optional, defaults to stdout)")
 	flag.Parse()
 
 	// For git textconv, accept file path as positional argument
@@ -36,7 +36,6 @@ func main() {
 		// Write to stdout (for git textconv)
 		err = WriteLSXToWriter(os.Stdout, resource)
 	} else {
-		// Write to file (backward compatibility)
 		err = WriteLSX(*outputFile, resource)
 	}
 	if err != nil {

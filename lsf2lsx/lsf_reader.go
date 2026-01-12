@@ -135,7 +135,8 @@ func (r *LSFReader) readSections(reader *binaryReader) error {
 	}
 	r.values = valuesData
 
-	if meta.MetadataFormat == LSFMetadataKeysAndAdjacency && meta.KeysSizeOnDisk > 0 {
+	// BG3 always uses LSFMetadataKeysAndAdjacency so don't need to check metadata format
+	if meta.KeysSizeOnDisk > 0 {
 		keysData, err := r.decompress(reader, meta.KeysSizeOnDisk, meta.KeysUncompressedSize, true)
 		if err != nil {
 			return err
@@ -262,9 +263,6 @@ func (r *LSFReader) buildResource() *Resource {
 		},
 		Regions: make(map[string]*Region),
 	}
-
-	meta := r.metadata
-	resource.MetadataFormat = meta.MetadataFormat
 
 	// Build nodes
 	r.nodeInstances = make([]*Node, len(r.nodes))
@@ -403,7 +401,6 @@ func (r *LSFReader) readString(reader *binaryReader, length int) string {
 	return string(bytes[:lastNull])
 }
 
-// unpack the 64bit Divinity Engine version
 func unpackVersion64(packed int64) PackedVersion {
 	return PackedVersion{
 		Major:    uint32((packed >> 55) & 0x7f),

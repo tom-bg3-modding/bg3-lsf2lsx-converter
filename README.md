@@ -34,7 +34,11 @@ If `-output` is not specified, the LSX is written to stdout. The input file can 
 
 ## Implementation Details
 
-The converter follows the same architecture as Norbyte's original C# implementation:
+The converter follows the same architecture as Norbyte's original C# implementation. At the highest level the conversion is:
+
+```
+LSF --Reader-> Resource --Writer-> LSX 
+```
 
 1. **LSF Reader** (`lsf_reader.go`): Reads binary LSF format
    - Parses file headers and metadata
@@ -50,15 +54,10 @@ The converter follows the same architecture as Norbyte's original C# implementat
    - Handles special types (TranslatedString, TranslatedFSString)
    - Pretty-prints with indentation
 
-4. **Data Structures** (`types.go`): Core data types
-   - Resource, Region, Node, NodeAttribute
-   - Attribute types and special string types
-
 ## File Format Support
 
 - **LSF Versions**: 5-7 (BG3 Extended Header, Node Keys, Patch 3)
 - **Compression**: None, LZ4, Zlib, Zstandard
-- **Games**: Baldur's Gate 3
 - **LSX Format**: Version 4 (uses type names instead of numeric type IDs)
 
 See the [DOCS](DOCS.md) file for a more detailed breakdown of how the tool works.
